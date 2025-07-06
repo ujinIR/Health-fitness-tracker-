@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health & Fitness Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f7;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    .form-section, .register-form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    label {
+      grid-column: span 2;
+      font-weight: bold;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 100%;
+    }
+
+    button {
+      grid-column: span 2;
+      padding: 12px;
+      background-color: #28a745;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    td button {
+      background-color: #dc3545;
+      color: white;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    td button:hover {
+      background-color: #c82333;
+    }
+
+    .nav-link {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .nav-link a {
+      margin: 0 10px;
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+
+    .nav-link a:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Health & Fitness Tracker</h1>
+    <div class="nav-link">
+      <a href="#register">Register</a>
+      <a href="#tracker">Go to Tracker</a>
+    </div>
+
+    <h2 id="register">User Registration</h2>
+    <form class="register-form" onsubmit="return validateForm()">
+      <label for="name">Full Name:</label>
+      <input type="text" id="name" placeholder="Enter your name" required>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" placeholder="Enter your email" required>
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" placeholder="Create a password" required>
+
+      <label for="confirmPassword">Confirm Password:</label>
+      <input type="password" id="confirmPassword" placeholder="Re-enter password" required>
+
+      <button type="submit">Register</button>
+    </form>
+
+    <h2 id="tracker">Daily Tracker</h2>
+    <div class="form-section">
+      <label for="date">Date:</label>
+      <input type="date" id="date" />
+
+      <label for="weight">Weight (kg):</label>
+      <input type="number" id="weight" placeholder="e.g. 65" />
+
+      <label for="calories">Calories Intake:</label>
+      <input type="number" id="calories" placeholder="e.g. 1800" />
+
+      <label for="exercise">Exercise Summary:</label>
+      <input type="text" id="exercise" placeholder="e.g. 30 min walk" />
+
+      <button type="button" onclick="addEntry()">Add Entry</button>
+    </div>
+
+    <table id="logTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Weight</th>
+          <th>Calories</th>
+          <th>Exercise</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if ("Notification" in window) {
+        Notification.requestPermission();
+      }
+
+      const entries = JSON.parse(localStorage.getItem("fitnessLogs")) || [];
+      entries.forEach((entry) => addRow(entry));
+    });
+
+    function showNotification(name) {
+      if (Notification.permission === "granted") {
+        new Notification("Registration Successful", {
+          body: `Welcome, ${name}!`,
+          icon: "https://cdn-icons-png.flaticon.com/512/633/633759.png"
+        });
+      }
+    }
+
+    function validateForm() {
+      const name = document.getElementById("name").value;
+      const pass = document.getElementById("password").value;
+      const confirm = document.getElementById("confirmPassword").value;
+
+      if (pass.length < 6) {
+        alert("Password must be at least 6 characters.");
+        return false;
+      }
+
+      if (pass !== confirm) {
+        alert("Passwords do not match.");
+        return false;
+      }
+
+      alert("Registration successful!");
+      showNotification(name);
+      return false;
+    }
+
+    function addEntry() {
+      const date = document.getElementById("date").value;
+      const weight = document.getElementById("weight").value;
+      const calories = document.getElementById("calories").value;
+      const exercise = document.getElementById("exercise").value;
+
+      if (!date || !weight || !calories || !exercise) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      const entry = { date, weight, calories, exercise };
+      addRow(entry);
+
+      const savedEntries = JSON.parse(localStorage.getItem("fitnessLogs")) || [];
+      savedEntries.push(entry);
+      localStorage.setItem("fitnessLogs", JSON.stringify(savedEntries));
+
+      document.getElementById("date").value = "";
+      document.getElementById("weight").value = "";
+      document.getElementById("calories").value = "";
+      document.getElementById("exercise").value = "";
+
+      if (calories > 2500) {
+        alert("Warning: High calorie intake recorded!");
+      }
+    }
+
+    function addRow(entry) {
+      const table = document.querySelector("#logTable tbody");
+      const newRow = document.createElement("tr");
+
+      newRow.innerHTML = `
+        <td>${entry.date}</td>
+        <td>${entry.weight}</td>
+        <td>${entry.calories}</td>
+        <td>${entry.exercise}</td>
+        <td><button onclick="deleteRow(this)">Delete</button></td>
+      `;
+
+      table.appendChild(newRow);
+    }
+
+    function deleteRow(button) {
+      const row = button.parentNode.parentNode;
+      const date = row.cells[0].innerText;
+      const weight = row.cells[1].innerText;
+      const calories = row.cells[2].innerText;
+      const exercise = row.cells[3].innerText;
+
+      let savedEntries = JSON.parse(localStorage.getItem("fitnessLogs")) || [];
+      savedEntries = savedEntries.filter(
+        (entry) =>
+          !(
+            entry.date === date &&
+            entry.weight === weight &&
+            entry.calories === calories &&
+            entry.exercise === exercise
+          )
+      );
+      localStorage.setItem("fitnessLogs", JSON.stringify(savedEntries));
+
+      row.remove();
+    }
+  </script>
+</body>
+</html>
